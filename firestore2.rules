@@ -1,0 +1,27 @@
+rules_version = '2';
+// Regras Firestore — Clube Desportivo ABC
+// Publicar em: Firebase Console → Firestore Database → Regras → colar → Publicar
+// Leitura pública das colecções do site; escrita apenas pela conta de administração.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      // Recomendado: trocar pelo UID da conta (Authentication → Users → User UID):
+      // return request.auth != null && request.auth.uid == 'COLAR_AQUI_O_UID';
+      return request.auth != null
+          && request.auth.token.email == 'pedromoeda@gmail.com';
+    }
+
+    match /{col}/{docId} {
+      allow read: if col in ['news', 'players', 'coaches', 'matches', 'titles',
+                             'international', 'stats', 'media', 'institution', 'organs',
+                             'partners', 'palmares'];
+      allow write: if isAdmin();
+    }
+
+    // Tudo o resto fica fechado
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
